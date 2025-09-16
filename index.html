@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IP Info Checker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: auto;
+        padding: 2rem;
+        background: #f0f0f0;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      form {
+        margin-bottom: 2rem;
+      }
+      input[type="text"] {
+        padding: 0.5rem;
+        width: 300px;
+        font-size: 1rem;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 1rem;
+        background: white;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+        text-align: left;
+      }
+      th {
+        background-color: #3498db;
+        color: white;
+      }
+      .error {
+        color: red;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>IP Information Checker</h1>
+
+    <form method="post">
+      <label for="ip">Enter IP address (leave blank for your own):</label><br />
+      <input
+        type="text"
+        id="ip"
+        name="ip"
+        placeholder="e.g. 8.8.8.8"
+        value="{{ ip if ip else '' }}"
+      />
+      <button type="submit">Check</button>
+    </form>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %} {% if isp and geo %}
+    <h2>Results for IP: {{ ip }}</h2>
+    <table>
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+
+      <tr>
+        <td>ISP</td>
+        <td>{{ isp.isp }}</td>
+      </tr>
+      <tr>
+        <td>Organization</td>
+        <td>{{ isp.org }}</td>
+      </tr>
+      <tr>
+        <td>ASN</td>
+        <td>{{ isp.as }}</td>
+      </tr>
+      <tr>
+        <td>ASN Number</td>
+        <td>{{ isp.asNo }}</td>
+      </tr>
+      <tr>
+        <td>Country (ISP Info)</td>
+        <td>{{ isp.country }} ({{ isp.countryCode }})</td>
+      </tr>
+      <tr>
+        <td>Country (Geo Info)</td>
+        <td>{{ geo.country.names.en }}</td>
+      </tr>
+      <tr>
+        <td>Continent (ISP Info)</td>
+        <td>{{ isp.continent }}</td>
+      </tr>
+      <tr>
+        <td>Continent (Geo Info)</td>
+        <td>{{ geo.continent.names.en }}</td>
+      </tr>
+      <tr>
+        <td>Timezone (ISP Info)</td>
+        <td>{{ isp.timezone }}</td>
+      </tr>
+      <tr>
+        <td>Timezone (Geo Info)</td>
+        <td>{{ geo.location.time_zone }}</td>
+      </tr>
+      <tr>
+        <td>Currency</td>
+        <td>{{ isp.currency }}</td>
+      </tr>
+      <tr>
+        <td>Latitude (ISP Info)</td>
+        <td>{{ isp.lat }}</td>
+      </tr>
+      <tr>
+        <td>Longitude (ISP Info)</td>
+        <td>{{ isp.lon }}</td>
+      </tr>
+      <tr>
+        <td>Latitude (Geo Info)</td>
+        <td>{{ geo.location.latitude }}</td>
+      </tr>
+      <tr>
+        <td>Longitude (Geo Info)</td>
+        <td>{{ geo.location.longitude }}</td>
+      </tr>
+      <tr>
+        <td>Network Range</td>
+        <td>{{ geo.traits.network }}</td>
+      </tr>
+    </table>
+    {% endif %}
+  </body>
+</html>
