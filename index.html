@@ -74,70 +74,78 @@
         <th>Field</th>
         <th>Value</th>
       </tr>
-
       <tr>
         <td>ISP</td>
-        <td>{{ isp.isp }}</td>
+        <td>{{ isp.get('isp', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Organization</td>
-        <td>{{ isp.org }}</td>
+        <td>{{ isp.get('org', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>ASN</td>
-        <td>{{ isp.as }}</td>
+        <td>{{ isp.get('as', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>ASN Number</td>
-        <td>{{ isp.asNo }}</td>
+        <td>{{ isp.get('asNo', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Country (ISP Info)</td>
-        <td>{{ isp.country }} ({{ isp.countryCode }})</td>
+        <td>
+          {{ isp.get('country', 'Not Available') }} ({{ isp.get('countryCode',
+          '-') }})
+        </td>
       </tr>
       <tr>
         <td>Country (Geo Info)</td>
-        <td>{{ geo.country.names.en }}</td>
+        <td>
+          {{ geo.get('country', {}).get('names', {}).get('en', 'Not Available')
+          }}
+        </td>
       </tr>
       <tr>
         <td>Continent (ISP Info)</td>
-        <td>{{ isp.continent }}</td>
+        <td>{{ isp.get('continent', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Continent (Geo Info)</td>
-        <td>{{ geo.continent.names.en }}</td>
+        <td>
+          {{ geo.get('continent', {}).get('names', {}).get('en', 'Not
+          Available') }}
+        </td>
       </tr>
       <tr>
         <td>Timezone (ISP Info)</td>
-        <td>{{ isp.timezone }}</td>
+        <td>{{ isp.get('timezone', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Timezone (Geo Info)</td>
-        <td>{{ geo.location.time_zone }}</td>
+        <td>{{ geo.get('location', {}).get('time_zone', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Currency</td>
-        <td>{{ isp.currency }}</td>
+        <td>{{ isp.get('currency', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Latitude (ISP Info)</td>
-        <td>{{ isp.lat }}</td>
+        <td>{{ isp.get('lat', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Longitude (ISP Info)</td>
-        <td>{{ isp.lon }}</td>
+        <td>{{ isp.get('lon', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Latitude (Geo Info)</td>
-        <td>{{ geo.location.latitude }}</td>
+        <td>{{ geo.get('location', {}).get('latitude', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Longitude (Geo Info)</td>
-        <td>{{ geo.location.longitude }}</td>
+        <td>{{ geo.get('location', {}).get('longitude', 'Not Available') }}</td>
       </tr>
       <tr>
         <td>Network Range</td>
-        <td>{{ geo.traits.network }}</td>
+        <td>{{ geo.get('traits', {}).get('network', 'Not Available') }}</td>
       </tr>
     </table>
     {% endif %}
