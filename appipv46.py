@@ -3,8 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-# Your existing API functions adapted for Flask app:
-
+# Get the user's public IP
 def get_public_ip():
     try:
         response = requests.get("https://api.ipify.org?format=json")
@@ -13,6 +12,7 @@ def get_public_ip():
     except requests.RequestException:
         return None
 
+# Get ISP info from API
 def get_isp_info(ip):
     url = "https://seo-api2.p.rapidapi.com/isp-checker"
     headers = {
@@ -27,6 +27,7 @@ def get_isp_info(ip):
     except requests.RequestException:
         return None
 
+# Get geolocation info from API
 def get_geo_info(ip):
     url = "https://seo-api2.p.rapidapi.com/ip-geolocation-checker"
     headers = {
@@ -57,8 +58,12 @@ def index():
         else:
             isp_data = get_isp_info(ip)
             geo_data = get_geo_info(ip)
-            if not isp_data or not geo_data:
-                error = "Error fetching data from API."
+
+            # Handle missing or incomplete data
+            if not isp_data or not geo_data or 'country' not in geo_data:
+                error = "Could not retrieve full data. Please check the IP or try again later."
+                isp_data = None
+                geo_data = None
 
     return render_template('index.html', ip=ip, isp=isp_data, geo=geo_data, error=error)
 
