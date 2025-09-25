@@ -28,8 +28,15 @@
     {% endif %}
 
     {% if isp %}
-        <p><b>ISP:</b> {{ isp.isp }}</p>
+        <p><b>ISP:</b> {{ isp.isp or "N/A" }}</p>
+        <p><b>Organization:</b> {{ isp.org or "N/A" }}</p>
+        <p><b>ASN:</b> {{ isp.as or "N/A" }}</p>
+        <p><b>ASN Number:</b> {{ isp.as.split(' ')[0][2:] if isp.as else "N/A" }}</p>
+        <p><b>IP Range:</b> {{ isp.range or "N/A" }}</p>
+
     {% endif %}
+
+    
 
     {% if geo %}
         <p><b>Country:</b> {{ geo.country }}</p>

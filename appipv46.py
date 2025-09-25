@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import requests
+import ipaddress
 
 app = Flask(__name__)
 
@@ -12,18 +13,32 @@ def get_public_ip():
     except requests.RequestException:
         return None
 
-# Get ISP info from ip-api
+# Get ISP + ASN info from ip-api
 def get_isp_info(ip):
-    url = f"http://ip-api.com/json/{ip}"
+    url = f"http://ip-api.com/json/{ip}?fields=status,isp,org,as,query"
     try:
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
         if data.get("status") == "success":
-            return {"isp": data.get("isp")}
+            try:
+                # make a /24 network from the given IP
+                network = ipaddress.ip_network(f"{data.get('query')}/24", strict=False)
+                ip_range = f"{network[0]} - {network[-1]}"
+            except Exception:
+                ip_range = None
+
+            return {
+                "isp": data.get("isp"),
+                "org": data.get("org"),
+                "as": data.get("as"),
+                "ip": data.get("query"),
+                "range": ip_range
+            }
         return None
     except requests.RequestException:
         return None
+
 
 # Get geolocation info from ip-api
 def get_geo_info(ip):
