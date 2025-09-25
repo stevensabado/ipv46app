@@ -1,153 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IP Info Checker</title>
+<head>
+    <meta charset="UTF-8">
+    <title>IP Tracker</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: auto;
-        padding: 2rem;
-        background: #f0f0f0;
-      }
-      h1 {
-        color: #2c3e50;
-      }
-      form {
-        margin-bottom: 2rem;
-      }
-      input[type="text"] {
-        padding: 0.5rem;
-        width: 300px;
-        font-size: 1rem;
-      }
-      button {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-        cursor: pointer;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 1rem;
-        background: white;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 0.5rem;
-        text-align: left;
-      }
-      th {
-        background-color: #3498db;
-        color: white;
-      }
-      .error {
-        color: red;
-        margin-bottom: 1rem;
-      }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error { color: red; font-weight: bold; }
+        #map { height: 400px; width: 100%; margin-top: 20px; }
     </style>
-  </head>
-  <body>
-    <h1>IP Information Checker</h1>
-
-    <form method="post">
-      <label for="ip">Enter IP address (leave blank for your own):</label><br />
-      <input
-        type="text"
-        id="ip"
-        name="ip"
-        placeholder="e.g. 8.8.8.8"
-        value="{{ ip if ip else '' }}"
-      />
-      <button type="submit">Check</button>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+    <h1>IP Tracker</h1>
+    <form method="POST">
+        <label for="ip">Enter IP address (optional):</label>
+        <input type="text" name="ip" id="ip">
+        <button type="submit">Track</button>
     </form>
 
     {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %} {% if isp and geo %}
-    <h2>Results for IP: {{ ip }}</h2>
-    <table>
-      <tr>
-        <th>Field</th>
-        <th>Value</th>
-      </tr>
-      <tr>
-        <td>ISP</td>
-        <td>{{ isp.get('isp', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Organization</td>
-        <td>{{ isp.get('org', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>ASN</td>
-        <td>{{ isp.get('as', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>ASN Number</td>
-        <td>{{ isp.get('asNo', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Country (ISP Info)</td>
-        <td>
-          {{ isp.get('country', 'Not Available') }} ({{ isp.get('countryCode',
-          '-') }})
-        </td>
-      </tr>
-      <tr>
-        <td>Country (Geo Info)</td>
-        <td>
-          {{ geo.get('country', {}).get('names', {}).get('en', 'Not Available')
-          }}
-        </td>
-      </tr>
-      <tr>
-        <td>Continent (ISP Info)</td>
-        <td>{{ isp.get('continent', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Continent (Geo Info)</td>
-        <td>
-          {{ geo.get('continent', {}).get('names', {}).get('en', 'Not
-          Available') }}
-        </td>
-      </tr>
-      <tr>
-        <td>Timezone (ISP Info)</td>
-        <td>{{ isp.get('timezone', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Timezone (Geo Info)</td>
-        <td>{{ geo.get('location', {}).get('time_zone', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Currency</td>
-        <td>{{ isp.get('currency', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Latitude (ISP Info)</td>
-        <td>{{ isp.get('lat', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Longitude (ISP Info)</td>
-        <td>{{ isp.get('lon', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Latitude (Geo Info)</td>
-        <td>{{ geo.get('location', {}).get('latitude', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Longitude (Geo Info)</td>
-        <td>{{ geo.get('location', {}).get('longitude', 'Not Available') }}</td>
-      </tr>
-      <tr>
-        <td>Network Range</td>
-        <td>{{ geo.get('traits', {}).get('network', 'Not Available') }}</td>
-      </tr>
-    </table>
+        <div class="error">{{ error }}</div>
     {% endif %}
-  </body>
+
+    {% if ip %}
+        <h2>Results for {{ ip }}</h2>
+    {% endif %}
+
+    {% if isp %}
+        <p><b>ISP:</b> {{ isp.isp }}</p>
+    {% endif %}
+
+    {% if geo %}
+        <p><b>Country:</b> {{ geo.country }}</p>
+        <p><b>City:</b> {{ geo.city }}</p>
+        <p><b>Latitude:</b> {{ geo.lat }}</p>
+        <p><b>Longitude:</b> {{ geo.lon }}</p>
+
+        <!-- Map -->
+        <div id="map"></div>
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script>
+            var map = L.map('map').setView([{{ geo.lat }}, {{ geo.lon }}], 10);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([{{ geo.lat }}, {{ geo.lon }}]).addTo(map)
+              .bindPopup("{{ geo.city }}, {{ geo.country }}<br>ISP: {{ isp.isp if isp else 'N/A' }}")
+              .openPopup();
+        </script>
+    {% endif %}
+    
+</body>
 </html>
+<!-- delete comment -->
