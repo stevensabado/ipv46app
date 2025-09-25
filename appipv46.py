@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import requests
+import ipaddress
 
 app = Flask(__name__)
 
@@ -12,33 +13,43 @@ def get_public_ip():
     except requests.RequestException:
         return None
 
-# Get ISP info from API
+# Get ISP + ASN info from ip-api
 def get_isp_info(ip):
-    url = "https://seo-api2.p.rapidapi.com/isp-checker"
-    headers = {
-        "x-rapidapi-key": "dc109e3e7fmsh0833d65ca28256dp152bbejsna0d2643850b4",
-        "x-rapidapi-host": "seo-api2.p.rapidapi.com"
-    }
-    params = {"ip": ip}
+    url = f"http://ip-api.com/json/{ip}?fields=status,isp,org,as,query"
     try:
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.get(url)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        if data.get("status") == "success":
+            try:
+                # make a /24 network from the given IP
+                network = ipaddress.ip_network(f"{data.get('query')}/24", strict=False)
+                ip_range = f"{network[0]} - {network[-1]}"
+            except Exception:
+                ip_range = None
+
+            return {
+                "isp": data.get("isp"),
+                "org": data.get("org"),
+                "as": data.get("as"),
+                "ip": data.get("query"),
+                "range": ip_range
+            }
+        return None
     except requests.RequestException:
         return None
 
-# Get geolocation info from API
+
+# Get geolocation info from ip-api
 def get_geo_info(ip):
-    url = "https://seo-api2.p.rapidapi.com/ip-geolocation-checker"
-    headers = {
-        "x-rapidapi-key": "dc109e3e7fmsh0833d65ca28256dp152bbejsna0d2643850b4",
-        "x-rapidapi-host": "seo-api2.p.rapidapi.com"
-    }
-    params = {"ip": ip}
+    url = f"http://ip-api.com/json/{ip}"
     try:
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.get(url)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        if data.get("status") == "success":
+            return data
+        return None
     except requests.RequestException:
         return None
 
@@ -59,8 +70,11 @@ def index():
             isp_data = get_isp_info(ip)
             geo_data = get_geo_info(ip)
 
-            # Handle missing or incomplete data
-            if not isp_data or not geo_data or 'country' not in geo_data:
+            # Debugging
+            print("ISP Data Response:", isp_data)
+            print("Geo Data Response:", geo_data)
+
+            if not isp_data or not geo_data:
                 error = "Could not retrieve full data. Please check the IP or try again later."
                 isp_data = None
                 geo_data = None
