@@ -9,16 +9,15 @@
         #map { height: 400px; width: 100%; margin-top: 20px; }
         
         .blurred {
-  filter: blur(6px);
-  cursor: pointer;
-  color: #555;
-}
+          filter: blur(6px);
+          cursor: pointer;
+          color: #555;
+        }
 
-.revealed {
-  filter: none;
-  color: black;
-}
-
+        .revealed {
+          filter: none;
+          color: black;
+        }
     </style>
     <!-- External CSS (Flask static folder) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='design.css') }}">
@@ -30,7 +29,7 @@
     <h1>IP Tracker</h1>
     <form method="POST">
         <label for="ip">Enter IP address (optional):</label>
-        <input type="text" name="ip" id="ip">
+        <input type="text" name="ip" id="ip" value="{{ ip or '' }}">
         <button type="submit">Track</button>
     </form>
 
@@ -39,35 +38,61 @@
     {% endif %}
 
     {% if ip %}
-        <h2>Results for {{ ip }}</h2>
+        <!-- Centered Results Title -->
+        <h2 class="results-title">Results for {{ ip }}</h2>
     {% endif %}
 
-    {% if isp %}
-        <p><b>ISP:</b> {{ isp.isp or "N/A" }}</p>
-        <p><b>Organization:</b> {{ isp.org or "N/A" }}</p>
-        <p><b>ASN:</b> {{ isp.as or "N/A" }}</p>
-        <p><b>ASN Number:</b> {{ isp.as.split(' ')[0][2:] if isp.as else "N/A" }}</p>
-        <p><b>IP Range:</b> {{ isp.range or "N/A" }}</p>
+    {% if isp or geo %}
+        <!-- Table with ISP and Geo details -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if isp %}
+                        <tr><td>ISP</td><td>{{ isp.isp or "N/A" }}</td></tr>
+                        <tr><td>Organization</td><td>{{ isp.org or "N/A" }}</td></tr>
+                        <tr><td>ASN</td><td>{{ isp.as or "N/A" }}</td></tr>
+                        <tr><td>ASN Number</td><td>{{ isp.as.split(' ')[0][2:] if isp.as else "N/A" }}</td></tr>
+                        <tr><td>IP Range</td><td>{{ isp.range or "N/A" }}</td></tr>
+                    {% endif %}
+
+                    {% if geo %}
+                        <tr><td>Country</td><td>{{ geo.country }}</td></tr>
+                        <tr><td>City</td><td>{{ geo.city }}</td></tr>
+
+                        <!-- Blurred coordinates -->
+                        <tr>
+                            <td>Latitude</td>
+                            <td>
+                                <span class="blurred" title="Click to reveal" onclick="revealValue(this)">
+                                    {{ geo.lat }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Longitude</td>
+                            <td>
+                                <span class="blurred" title="Click to reveal" onclick="revealValue(this)">
+                                    {{ geo.lon }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     {% endif %}
 
     {% if geo %}
-        <p><b>Country:</b> {{ geo.country }}</p>
-        <p><b>City:</b> {{ geo.city }}</p>
-
-        <!-- Blurred coordinates -->
-        <p><b>Latitude:</b>
-           <span class="blurred" title="Click to reveal" onclick="revealValue(this)">
-              {{ geo.lat }}
-           </span>
-        </p>
-        <p><b>Longitude:</b>
-           <span class="blurred" title="Click to reveal" onclick="revealValue(this)">
-              {{ geo.lon }}
-           </span>
-        </p>
-
-        <!-- Map -->
-        <div id="map"></div>
+        <!-- Map box -->
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
 
         <!-- Leaflet JS -->
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
